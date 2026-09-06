@@ -1,0 +1,19 @@
+{
+  "features": {
+    "ghcr.io/devcontainers-extra/features/golangci-lint:1": {
+      "version": "1.0.0",
+      "resolved": "ghcr.io/devcontainers-extra/features/golangci-lint@sha256:62540e8227666ba94a78f4ffc125d6c81d082dd1f202490dd3bae1084a3b7a5b",
+      "integrity": "sha256:62540e8227666ba94a78f4ffc125d6c81d082dd1f202490dd3bae1084a3b7a5b"
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "1.10.0",
+      "resolved": "ghcr.io/devcontainers/features/docker-outside-of-docker@sha256:c2c2cf829505ead8e4892c88c31b6594ae94a2bbb209e16e1fac456c1a3a624e",
+      "integrity": "sha256:c2c2cf829505ead8e4892c88c31b6594ae94a2bbb209e16e1fac456c1a3a624e"
+    },
+    "ghcr.io/guiyomh/features/vim": {
+      "version": "0.0.1",
+      "resolved": "ghcr.io/guiyomh/features/vim@sha256:53c64a458fe88f40862ad5f94ea3f8d7fdf46c3fb42bdaa8a6a09f7d44f182f7",
+      "integrity": "sha256:53c64a458fe88f40862ad5f94ea3f8d7fdf46c3fb42bdaa8a6a09f7d44f182f7"
+    }
+  }
+}

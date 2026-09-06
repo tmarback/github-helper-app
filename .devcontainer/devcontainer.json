@@ -1,0 +1,47 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/go .
+{
+    "name": "github-helper-app",
+	"build": {
+        "dockerfile": "./Dockerfile",
+        "context": "."
+    },
+	"features": {
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+            "version": "latest",
+            "moby": false
+        },
+        "ghcr.io/guiyomh/features/vim": {},
+        "ghcr.io/devcontainers-extra/features/golangci-lint:1": {
+            "version": "2.13.2"
+        }
+    },
+
+    "postCreateCommand": "go mod download",
+    "remoteEnv": {
+        "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+    },
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly",
+        {
+            "type": "volume",
+            "source": "devcontainer-home-cache",
+            "target": "/home/vscode/.cache"
+        },
+        {
+            "type": "volume",
+            "source": "devcontainer-go-cache",
+            "target": "/home/vscode/go"
+        }
+    ],
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "donjayamanne.githistory",
+                "github.vscode-github-actions",
+                "yzhang.markdown-all-in-one"
+            ]
+        }
+    }
+}

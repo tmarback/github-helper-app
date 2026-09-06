@@ -1,0 +1,120 @@
+# Build workflow
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+    tags:
+      - v*
+
+# Ensure builds are in order so the edge tags don't
+# get moved backwards if a build happens to be slow
+concurrency:
+  group: ci-${{ github.ref }}
+  queue: max
+
+jobs:
+  checks:
+    name: Run checks
+    uses: $/.github/workflows/checks.yml
+
+  build:
+    name: Build image
+    needs:
+      - checks
+    runs-on: ubuntu-latest
+    environment: publish
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    env:
+      IMAGE_FULL_NAME: ${{ vars.REGISTRY_HOST || 'ghcr.io' }}/${{ vars.IMAGE_NAME || github.repository }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ${{ env.IMAGE_FULL_NAME }}
+          tags: |
+            # Different semver variants
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            # Mark latest build
+            type=edge,branch=main
+            # Also mark per branch
+            type=ref,event=branch,prefix=edge-
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Login to container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ vars.REGISTRY_HOST || 'ghcr.io' }}
+          username: ${{ secrets.REGISTRY_USER || github.actor }}
+          password: ${{ secrets.REGISTRY_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        id: image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          sbom: false # Doesn't include SBOM cataloger https://github.com/docker/buildkit-syft-scanner/issues/109
+          provenance: false # Messes with Harbor
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.1.2
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Sign image (private)
+        if: ${{ github.event.repository.private }}
+        run: cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${{ env.IMAGE_FULL_NAME }}@${{ steps.image.outputs.digest }}
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+
+      - name: Sign image (public)
+        if: ${{ ! github.event.repository.private }}
+        run: cosign sign --yes ${{ env.IMAGE_FULL_NAME }}@${{ steps.image.outputs.digest }}
+
+      - name: Generate artifact attestation
+        if: ${{ ! github.event.repository.private }}
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-name: ${{ env.IMAGE_FULL_NAME }}
+          subject-digest: ${{ steps.image.outputs.digest }}
+          push-to-registry: false
+
+      - name: Generate SBOM
+        if: ${{ ! github.event.repository.private }}
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE_FULL_NAME }}@${{ steps.image.outputs.digest }}
+          artifact-name: sbom.spdx.json
+          output-file: ./sbom.spdx.json
+          upload-artifact: true
+        env:
+          SYFT_SELECT_CATALOGERS: +sbom-cataloger,-file # Catalog nested SBOMs, skip files (bloats the SBOM)
+
+      - name: Generate SBOM attestation
+        if: ${{ ! github.event.repository.private }}
+        uses: actions/attest-sbom@v4
+        with:
+          subject-name: ${{ env.IMAGE_FULL_NAME }}
+          subject-digest: ${{ steps.image.outputs.digest }}
+          sbom-path: ./sbom.spdx.json
+          push-to-registry: false 

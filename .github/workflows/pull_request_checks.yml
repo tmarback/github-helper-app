@@ -1,0 +1,56 @@
+# Workflow for testing that the code of incoming pull requests builds, validates, and follows style guidelines
+
+name: PR Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+  merge_group:
+    types:
+      - checks_requested
+
+concurrency: 
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Run checks
+    uses: $/.github/workflows/checks.yml
+
+  build:
+    name: Build image
+    needs:
+      - checks
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_FULL_NAME: ${{ vars.REGISTRY_HOST || 'ghcr.io' }}/${{ vars.IMAGE_NAME || github.repository }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ${{ env.IMAGE_FULL_NAME }}
+          tags: |
+            type=raw,value=pr
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        id: image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          push: false
+          sbom: false
+          provenance: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
