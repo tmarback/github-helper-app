@@ -1,7 +1,7 @@
 name: CI checks
 
 on:
-  workflow_dispatch:
+  workflow_call:
 
 env:
   BUILD_GO_VERSION: 1.26
