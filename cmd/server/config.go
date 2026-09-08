@@ -24,7 +24,11 @@ type Config struct {
 	// The hostname to bind to
 	Hostname string `koanf:"hostname"`
 	// The port to bind to
-	Port int `koanf:"port"`
+	Port       int `koanf:"port"`
+	GithubAuth struct {
+		PrivateKeyPath string `koanf:"privateKeyPath"`
+		ClientId       string `koanf:"clientId"`
+	} `koanf:"githubAuth"`
 }
 
 // Loads the server configuration

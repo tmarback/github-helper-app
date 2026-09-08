@@ -1,2 +1,4 @@
+# Runtime configuration
+/.local/
 /.env
 /config.yaml
