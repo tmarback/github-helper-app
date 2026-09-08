@@ -38,7 +38,9 @@ type CommandRegistry struct {
 func NewRegistry() *CommandRegistry {
 
 	// Initialize command list
-	commands := [...]CommentCommand{}
+	commands := [...]CommentCommand{
+		&ApproveCommand{},
+	}
 
 	// Convert list into a map
 	commandMap := make(map[string]CommentCommand, len(commands))
