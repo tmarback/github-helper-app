@@ -5,10 +5,19 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/cbrgm/githubevents/v2/githubevents"
 	"github.com/tmarback/github-helper-app/internal/event_handlers"
 )
+
+// Parse the requested log level
+func parseLogLevel(s string) (level slog.Level, err error) {
+
+	err = level.UnmarshalText([]byte(s))
+	return
+
+}
 
 func main() {
 
@@ -17,6 +26,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load application config: %v", err)
 	}
+
+	// Set up logging
+	logLevel, err := parseLogLevel(config.LogLevel)
+	if err != nil {
+		log.Fatalf("Failed to parse log level: %v", err)
+	}
+	log.Printf("Using log level %v", logLevel)
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: logLevel,
+	}))
+	slog.SetDefault(logger)
 
 	// Initialize event manager
 	if config.WebhookSecret == "" {

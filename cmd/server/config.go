@@ -17,6 +17,8 @@ import (
 
 // Server configuration
 type Config struct {
+	// The minimum level to log
+	LogLevel string `koanf:"logLevel"`
 	// The secret that the webhook must have to be accepted
 	WebhookSecret string `koanf:"webhookSecret"`
 	// The hostname to bind to
