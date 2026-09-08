@@ -26,7 +26,9 @@ type Config struct {
 	// The port to bind to
 	Port int `koanf:"port"`
 	// Configuration of auth via Github App
-	GithubAppAuth *GithubAppTokenConfig `koanf:"githubAuth"`
+	GithubAppAuth *GithubAppTokenConfig `koanf:"githubApp"`
+	// Configuration of auth via Github PAT
+	GithubPatAuth *GithubPatTokenConfig `koanf:"githubPat"`
 }
 
 // Loads the server configuration

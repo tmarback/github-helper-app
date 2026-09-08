@@ -45,6 +45,12 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed to create app auth provider: %v", err)
 		}
+	} else if config.GithubPatAuth != nil {
+		slog.Info("Configuring Github PAT authentication")
+		tokenSourceProvider, err = config.GithubPatAuth.Create()
+		if err != nil {
+			log.Fatalf("Failed to create PAT auth provider: %v", err)
+		}
 	} else {
 		log.Fatalf("No auth configuration was provided")
 	}

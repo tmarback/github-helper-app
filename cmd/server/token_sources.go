@@ -54,3 +54,32 @@ func (config *GithubAppTokenConfig) Create() (*GithubAppTokenSourceProvider, err
 	}, nil
 
 }
+
+// Github PAT-based token source provider
+type GithubPatTokenSourceProvider struct {
+	// PAT to use
+	token string
+}
+
+func (provider *GithubPatTokenSourceProvider) TokenSource(ctx context.Context, installation *github.Installation) oauth2.TokenSource {
+	return githubauth.NewPersonalAccessTokenSource(provider.token)
+}
+
+// Configuration for Github PAT provider
+type GithubPatTokenConfig struct {
+	// PAT to use
+	Token string `koanf:"token"`
+}
+
+// Creates a new instance
+func (config *GithubPatTokenConfig) Create() (*GithubPatTokenSourceProvider, error) {
+
+	if config.Token == "" {
+		return nil, fmt.Errorf("token must be provided")
+	}
+
+	return &GithubPatTokenSourceProvider{
+		token: config.Token,
+	}, nil
+
+}
