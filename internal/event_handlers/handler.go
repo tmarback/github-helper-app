@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/go-github/v91/github"
 	"github.com/jferrl/go-githubauth"
+	"github.com/tmarback/github-helper-app/internal/commands"
 	"golang.org/x/oauth2"
 )
 
@@ -13,12 +14,14 @@ import (
 type EventHandler struct {
 	// Source of application-level authentication tokens
 	applicationTokenSource oauth2.TokenSource
+	commandRegistry        *commands.CommandRegistry
 }
 
 // Creates a new handler that uses the given source of application tokens
 func NewHandler(applicationTokenSource oauth2.TokenSource) *EventHandler {
 	return &EventHandler{
 		applicationTokenSource: applicationTokenSource,
+		commandRegistry:        commands.NewRegistry(),
 	}
 }
 
