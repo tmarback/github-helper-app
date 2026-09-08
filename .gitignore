@@ -1,2 +1,7 @@
+# Runtime configuration
+/.local/
 /.env
 /config.yaml
+
+# Debug binaries
+__debug_bin*

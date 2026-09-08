@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/cbrgm/githubevents/v2/githubevents"
+	"github.com/jferrl/go-githubauth"
 	"github.com/tmarback/github-helper-app/internal/event_handlers"
 )
 
@@ -38,6 +39,24 @@ func main() {
 	}))
 	slog.SetDefault(logger)
 
+	// Read private key
+	if config.GithubAuth.PrivateKeyPath == "" {
+		log.Fatalf("Private key path must be provided")
+	}
+	privateKey, err := os.ReadFile(config.GithubAuth.PrivateKeyPath)
+	if err != nil {
+		log.Fatalf("Failed to read private key file: %v", err)
+	}
+
+	// Create application token source
+	applicationTokenSource, err := githubauth.NewApplicationTokenSource(config.GithubAuth.ClientId, privateKey)
+	if err != nil {
+		log.Fatalf("Error creating application token source: %v", err)
+	}
+
+	// Create event handler
+	eventHandler := event_handlers.NewHandler(applicationTokenSource)
+
 	// Initialize event manager
 	if config.WebhookSecret == "" {
 		slog.Warn("Webhook secret not configured")
@@ -45,7 +64,7 @@ func main() {
 	handle := githubevents.New(config.WebhookSecret)
 
 	// Register handlers
-	handle.OnIssueCommentCreated(event_handlers.HandleIssueComment)
+	handle.OnIssueCommentCreated(eventHandler.HandleIssueComment)
 
 	// Configure HTTP endpoint
 	http.HandleFunc("/hook", func(w http.ResponseWriter, r *http.Request) {
