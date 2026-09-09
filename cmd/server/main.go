@@ -99,7 +99,12 @@ func main() {
 
 	// Start HTTP server
 	slog.Info("Starting server", slog.String("address", addr))
-	if err := server.ListenAndServe(); err != nil {
+	if config.Tls == nil {
+		err = server.ListenAndServe()
+	} else {
+		err = server.ListenAndServeTLS(config.Tls.CertPath, config.Tls.KeyPath)
+	}
+	if err != nil {
 		log.Panic(err)
 	}
 

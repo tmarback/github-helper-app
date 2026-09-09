@@ -15,6 +15,14 @@ import (
 	"github.com/knadh/koanf/v2"
 )
 
+// Server TLS configuration
+type ServerTlsConfig struct {
+	// Path to the public certificate file
+	CertPath string
+	// Path to the private key file
+	KeyPath string
+}
+
 // Server configuration
 type Config struct {
 	// The minimum level to log
@@ -29,6 +37,8 @@ type Config struct {
 	GithubAppAuth *GithubAppTokenConfig `koanf:"githubApp"`
 	// Configuration of auth via Github PAT
 	GithubPatAuth *GithubPatTokenConfig `koanf:"githubPat"`
+	// Optional TLS configuration
+	Tls *ServerTlsConfig `koanf:"tls"`
 }
 
 // Loads the server configuration
