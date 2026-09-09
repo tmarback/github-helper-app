@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/cbrgm/githubevents/v2/githubevents"
 	"github.com/tmarback/github-helper-app/internal/event_handlers"
@@ -78,10 +79,20 @@ func main() {
 		}
 	})
 
-	// Start HTTP server
+	// Configure HTTP server
 	addr := fmt.Sprintf("%s:%d", config.Hostname, config.Port)
+	server := &http.Server{
+		Addr:         addr,
+		Handler:      http.DefaultServeMux,
+		TLSConfig:    nil,
+		ReadTimeout:  5 * time.Minute,
+		WriteTimeout: 10 * time.Minute,
+		IdleTimeout:  2 * time.Minute,
+	}
+
+	// Start HTTP server
 	slog.Info("Starting server", slog.String("address", addr))
-	if err := http.ListenAndServe(addr, nil); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Panic(err)
 	}
 
