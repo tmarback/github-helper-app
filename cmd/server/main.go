@@ -1,11 +1,14 @@
 package main
 
 import (
+	"crypto/tls"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/cbrgm/githubevents/v2/githubevents"
 	"github.com/tmarback/github-helper-app/internal/event_handlers"
@@ -78,11 +81,32 @@ func main() {
 		}
 	})
 
-	// Start HTTP server
-	addr := fmt.Sprintf("%s:%d", config.Hostname, config.Port)
-	slog.Info("Starting server", slog.String("address", addr))
-	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Panic(err)
+	// Configure TLS parameters
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12,
 	}
+
+	// Configure HTTP server
+	addr := fmt.Sprintf("%s:%d", config.Hostname, config.Port)
+	server := &http.Server{
+		Addr:         addr,
+		Handler:      http.DefaultServeMux,
+		TLSConfig:    tlsConfig,
+		ReadTimeout:  5 * time.Minute,
+		WriteTimeout: 10 * time.Minute,
+		IdleTimeout:  2 * time.Minute,
+	}
+
+	// Start HTTP server
+	slog.Info("Starting server", slog.String("address", addr))
+	if config.Tls == nil {
+		err = server.ListenAndServe()
+	} else {
+		err = server.ListenAndServeTLS(config.Tls.CertPath, config.Tls.KeyPath)
+	}
+	if !errors.Is(err, http.ErrServerClosed) {
+		log.Panicf("Error in HTTP server: %v", err)
+	}
+	slog.Info("Stopping server")
 
 }
