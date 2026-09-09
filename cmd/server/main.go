@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"log/slog"
@@ -79,12 +80,18 @@ func main() {
 		}
 	})
 
+	// Configure TLS parameters
+	tlsConfig := &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		PreferServerCipherSuites: true,
+	}
+
 	// Configure HTTP server
 	addr := fmt.Sprintf("%s:%d", config.Hostname, config.Port)
 	server := &http.Server{
 		Addr:         addr,
 		Handler:      http.DefaultServeMux,
-		TLSConfig:    nil,
+		TLSConfig:    tlsConfig,
 		ReadTimeout:  5 * time.Minute,
 		WriteTimeout: 10 * time.Minute,
 		IdleTimeout:  2 * time.Minute,
