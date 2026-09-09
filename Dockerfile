@@ -10,6 +10,13 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 
 FROM debian:trixie-slim
 
+# Install OS dependencies
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates
+
 # Root group for OpenShift compatibility
 RUN useradd --uid 1000 --gid root --no-user-group --create-home runner
 
