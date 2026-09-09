@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -104,8 +105,9 @@ func main() {
 	} else {
 		err = server.ListenAndServeTLS(config.Tls.CertPath, config.Tls.KeyPath)
 	}
-	if err != nil {
-		log.Panic(err)
+	if !errors.Is(err, http.ErrServerClosed) {
+		log.Panicf("Error in HTTP server: %v", err)
 	}
+	slog.Info("Stopping server")
 
 }
