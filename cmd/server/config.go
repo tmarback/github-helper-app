@@ -18,9 +18,9 @@ import (
 // Server TLS configuration
 type ServerTlsConfig struct {
 	// Path to the public certificate file
-	CertPath string
+	CertPath string `koanf:"certPath"`
 	// Path to the private key file
-	KeyPath string
+	KeyPath string `koanf:"keyPath"`
 }
 
 // Server configuration
