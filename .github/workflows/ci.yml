@@ -28,7 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: publish
     permissions:
-      contents: read
+      contents: write # Write for sbom-action artifact uploads on release
+      actions: read # To find workflow artifacts when attaching release assets
       packages: write
       id-token: write
       attestations: write
