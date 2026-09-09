@@ -83,8 +83,7 @@ func main() {
 
 	// Configure TLS parameters
 	tlsConfig := &tls.Config{
-		MinVersion:               tls.VersionTLS12,
-		PreferServerCipherSuites: true,
+		MinVersion: tls.VersionTLS12,
 	}
 
 	// Configure HTTP server
