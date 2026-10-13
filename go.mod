@@ -8,7 +8,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/jferrl/go-githubauth v1.7.0
 	github.com/knadh/koanf/parsers/yaml v1.1.1
-	github.com/knadh/koanf/providers/env/v2 v2.0.1
+	github.com/knadh/koanf/providers/env/v2 v2.0.2
 	github.com/knadh/koanf/providers/file v1.2.1
 	github.com/knadh/koanf/providers/structs v1.0.1
 	github.com/knadh/koanf/v2 v2.3.6
